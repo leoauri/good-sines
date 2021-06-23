@@ -21,6 +21,9 @@ def test_volumes():
 
 def test_volume_stochastic():
     sine_pool_volume = SinePool(min_volume=-6, max_volume=-3)
-    sine = sine_pool_volume.random_sine()
-    assert amp_to_db(sine.max()) < -3 + 1e-8
-    assert amp_to_db(sine.max()) > -6 - 1e-8
+    count = 0
+    for sine in sine_pool_volume:
+        assert amp_to_db(sine.max()) < -3 + 1e-8
+        assert amp_to_db(sine.max()) > -6 - 1e-8
+        count += 1
+    assert count == sine_pool_volume.epoch_size
