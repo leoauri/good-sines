@@ -1,5 +1,6 @@
-from audible_sines import SinePool
+from audible_sines import SinePool, SinePoolDeterministic
 import math
+import numpy as np
 
 sine_pool = SinePool()
 
@@ -27,3 +28,15 @@ def test_volume_stochastic():
         assert amp_to_db(sine.max()) > -6 - 1e-8
         count += 1
     assert count == sine_pool_volume.epoch_size
+
+def test_deterministic_sine_pool():
+    dsp = SinePoolDeterministic()
+    assert len(list(dsp)) == len(dsp.freqs) * len(dsp.volumes)
+    for s in dsp:
+        assert s.min() != s.max()
+
+def test_window():
+    pools = [SinePoolDeterministic(volumes=[0]), SinePool(min_volume=0, max_volume=0, epoch_size=10)]
+    for pool in pools:
+        for s in pool:
+            assert np.all(np.less_equal(abs(s), pool.window))
