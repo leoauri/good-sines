@@ -1,6 +1,7 @@
-from audible_sines import SinePool, SinePoolDeterministic
+from audible_sines import SinePool, SinePoolDeterministic, AudibleSines
 import math
 import numpy as np
+from torch import Tensor
 
 sine_pool = SinePool()
 
@@ -40,3 +41,13 @@ def test_window():
     for pool in pools:
         for s in pool:
             assert np.all(np.less_equal(abs(s), pool.window))
+
+def test_datamodule():
+    dm = AudibleSines()
+    dm.prepare_data()
+    dm.setup(stage='fit')
+
+    for batch in dm.train_dataloader():
+        assert batch.shape == (4, dm.train_set.sample_len)
+        assert isinstance(batch, Tensor)
+        assert isinstance(batch[0], Tensor)

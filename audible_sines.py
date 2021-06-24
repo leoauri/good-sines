@@ -1,9 +1,12 @@
+from typing import Optional
 import pytorch_lightning as pl
 import torch
 import numpy as np
 import librosa
 import random
 import math
+from torch.utils.data import DataLoader
+
 
 class SinePoolBase(torch.utils.data.IterableDataset):
     @staticmethod
@@ -71,4 +74,20 @@ class SinePool(SinePoolBase):
         return tone * self.window
 
 class AudibleSines(pl.LightningDataModule):
-    pass
+    def __init__(self, batch_size=4):
+        super().__init__()
+        self.batch_size = batch_size
+
+    def setup(self, stage: Optional[str] = None):
+        self.train_set = SinePool()
+        self.valid_set = SinePoolDeterministic()
+        self.test_set = SinePoolDeterministic(freqs=[60, 120, 600, 2000], volumes=[0, -12, -14])
+
+    def train_dataloader(self):
+        return DataLoader(self.train_set, batch_size=self.batch_size)
+
+    def val_dataloader(self):
+        return DataLoader(self.valid_set, batch_size=self.batch_size)
+
+    def test_dataloader(self):
+        return DataLoader(self.test_set, batch_size=self.batch_size)
