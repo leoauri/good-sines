@@ -42,8 +42,8 @@ class SinePoolDeterministic(SinePoolBase):
                 yield tone * self.window
 
 class SinePool(SinePoolBase):
-    def __init__(self, epoch_size=100, min_freq=20, max_freq=20000, min_volume=-40, max_volume=0, 
-            mixup_alpha=0.1, **kwargs) -> None:
+    def __init__(self, epoch_size=100, min_freq=20, max_freq=20000, min_volume=-14, max_volume=0, 
+            mixup_alpha=0.05, **kwargs) -> None:
         super().__init__(**kwargs)
         self.epoch_size = epoch_size
         self.min_freq = math.log(min_freq)
