@@ -26,10 +26,10 @@ class SinePoolDeterministic(SinePoolBase):
     def __init__(self, freqs: list[float]=None, volumes: list[float]=None, **kwargs) -> None:
         super().__init__(**kwargs)
         if freqs is None:
-            min = math.log(20)
-            max = math.log(20000)
+            minf = math.log(20)
+            maxf = math.log(20000)
             steps = 20
-            self.freqs = [math.exp(i * (max - min) / steps + min) for i in range(steps)]
+            self.freqs = [math.exp(i * (maxf - minf) / steps + minf) for i in range(steps)]
         else:
             self.freqs = freqs
 
