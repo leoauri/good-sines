@@ -60,8 +60,12 @@ class SinePool(SinePoolBase):
         for i in range(self.epoch_size):
             yield self.mixup(self.random_sine(), self.random_sine())
 
+    @staticmethod
+    def scale(x, low, high):
+        return low + x * (high - low)
+
     def random_sine(self):
-        freq = math.exp(random.uniform(self.min_freq, self.max_freq))
+        freq = math.exp(self.scale(random.weibullvariate(0.25, 1.48), self.min_freq, self.max_freq))
         amp = self.db_to_amp(random.uniform(self.min_volume, self.max_volume))
         tone = librosa.tone(freq, sr=self.sr, length=self.sample_len) * amp
         return tone * self.window
