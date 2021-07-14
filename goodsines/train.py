@@ -1,7 +1,7 @@
 import pytorch_lightning as pl
 import torch
 from waveflow import WaveFlow, TacotronSTFT, WaveFlowLossDataParallel
-from audible_sines import AudibleSines
+from .audible_sines import AudibleSines
 
 class GoodSines(pl.LightningModule):
     def __init__(self):
