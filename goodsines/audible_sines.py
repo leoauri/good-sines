@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 import pytorch_lightning as pl
 import torch
 import numpy as np
@@ -26,7 +26,7 @@ class SinePoolBase(torch.utils.data.IterableDataset):
         assert len(self.window) == self.sample_len
 
 class SinePoolDeterministic(SinePoolBase):
-    def __init__(self, freqs: list[float]=None, volumes: list[float]=None, **kwargs) -> None:
+    def __init__(self, freqs: List[float]=None, volumes: List[float]=None, **kwargs) -> None:
         super().__init__(**kwargs)
         if freqs is None:
             minf = math.log(20)
