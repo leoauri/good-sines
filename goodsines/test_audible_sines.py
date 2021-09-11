@@ -1,4 +1,4 @@
-from audible_sines import SinePool, SinePoolDeterministic, AudibleSines
+from goodsines.audible_sines import SinePool, SinePoolDeterministic, AudibleSines
 import math
 import numpy as np
 from torch import Tensor
