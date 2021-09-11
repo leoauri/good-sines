@@ -6,6 +6,7 @@ import librosa
 import random
 import math
 from torch.utils.data import DataLoader
+from functools import partial
 
 
 class SinePoolBase(torch.utils.data.IterableDataset):
@@ -74,14 +75,18 @@ class SinePool(SinePoolBase):
         return tone * self.window
 
 class AudibleSines(pl.LightningDataModule):
-    def __init__(self, batch_size=4):
+    def __init__(self, batch_size=4, train_set=None, valid_set=None, test_set=None):
         super().__init__()
         self.batch_size = batch_size
+        self.train_set = SinePool if train_set is None else train_set
+        self.valid_set = SinePoolDeterministic if valid_set is None else valid_set
+        self.test_set = partial(SinePoolDeterministic, freqs=[60, 120, 600, 2000], 
+            volumes=[0, -12, -14]) if test_set is None else test_set
 
     def setup(self, stage: Optional[str] = None):
-        self.train_set = SinePool()
-        self.valid_set = SinePoolDeterministic()
-        self.test_set = SinePoolDeterministic(freqs=[60, 120, 600, 2000], volumes=[0, -12, -14])
+        self.train_set = self.train_set()
+        self.valid_set = self.valid_set()
+        self.test_set = self.test_set()
 
     def train_dataloader(self):
         return DataLoader(self.train_set, batch_size=self.batch_size)
