@@ -26,6 +26,7 @@ class SinePoolBase(torch.utils.data.IterableDataset):
 
         assert len(self.window) == self.sample_len
 
+
 class SinePoolDeterministic(SinePoolBase):
     def __init__(self, freqs: List[float]=None, volumes: List[float]=None, **kwargs) -> None:
         super().__init__(**kwargs)
@@ -44,6 +45,7 @@ class SinePoolDeterministic(SinePoolBase):
             for vol in self.volumes:
                 tone = librosa.tone(freq, sr=self.sr, length=self.sample_len) * self.db_to_amp(vol)
                 yield tone * self.window
+
 
 class SinePool(SinePoolBase):
     def __init__(self, epoch_size=100, min_freq=20, max_freq=20000, min_volume=-14, max_volume=0, 
@@ -74,6 +76,7 @@ class SinePool(SinePoolBase):
         tone = librosa.tone(freq, sr=self.sr, length=self.sample_len) * amp
         return tone * self.window
 
+
 class AudibleSines(pl.LightningDataModule):
     def __init__(self, batch_size=4, train_set=None, valid_set=None, test_set=None):
         super().__init__()
@@ -96,3 +99,30 @@ class AudibleSines(pl.LightningDataModule):
 
     def test_dataloader(self):
         return DataLoader(self.test_set, batch_size=self.batch_size)
+
+
+class SineTo8vb(SinePoolDeterministic):
+    def __init__(self, phases=None, **kwargs):
+        super().__init__(**kwargs)
+        self.phases = ['random']*50 if phases is None else phases
+
+    def dataset_pair(self, vol='random', phi='random'):
+        phi_calculated = random.uniform(0, math.pi*2) if phi == 'random' else phi
+        vol_calculated = (random.weibullvariate(0.25, 1.48) * -40 if vol == 'random' 
+                else vol)
+        x = librosa.tone(400, sr=self.sr, length=self.sample_len, 
+            phi=phi_calculated) * self.db_to_amp(vol_calculated)
+        y = librosa.tone(200, sr=self.sr, length=self.sample_len, 
+            phi=random.uniform(0, math.pi*2)) * self.db_to_amp(vol_calculated)
+        return torch.Tensor(x * self.window), torch.Tensor(y * self.window)
+
+    def __iter__(self):
+        for vol in self.volumes:
+            for phi in self.phases:
+                yield self.dataset_pair(vol, phi)
+
+SineTo8vbValid = partial(SineTo8vb, phases=np.linspace(0, math.pi*2,
+        endpoint=False))
+
+SineTo8vbDataModule = partial(AudibleSines, train_set=SineTo8vb,
+        valid_set=SineTo8vbValid)
